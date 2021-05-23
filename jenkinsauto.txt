@@ -1,0 +1,49 @@
+pipeline {
+    tools{
+        jdk 'myjava2'
+        maven 'mymaven'
+    }
+    agent none
+    stages{
+        stage('checkout'){
+            agent any
+            steps{
+                git 'https://github.com/amit9853/DevOpsClassCodes.git'
+            }
+            
+        }
+        stage('compile'){
+            agent {label "linux_slave"}
+            steps{
+                git 'https://github.com/amit9853/DevOpsClassCodes.git'
+                sh 'mvn compile'
+            }
+            
+        }
+        stage('codereview'){
+            agent any
+            steps{
+                sh 'mvn pmd:pmd'
+            }
+            
+        }
+        stage('unittest'){
+            agent any
+            steps{
+                sh 'mvn test'
+            }
+        }
+        stage('metriccheck'){
+            agent any
+            steps{
+                sh 'mvn cobertura:cobertura -Dcobertura.report.format=xml'
+            }
+        }
+        stage ('package'){
+            agent any
+            steps{
+                sh 'mvn package'
+            }
+        }
+    }
+}
